@@ -44,5 +44,6 @@ def attenuate(original_energy, coeff, depth):
 		s1 = [np.exp(-u*d) for d in depth]
 		original_energy[i] *= s1
 
+	print('hi')
 	print(original_energy[9])
 	return original_energy
