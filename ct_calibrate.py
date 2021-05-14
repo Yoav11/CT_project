@@ -1,6 +1,8 @@
 import numpy as np
 import scipy
 from scipy import interpolate
+import sys
+from ct_detect import ct_detect
 
 def ct_calibrate(photons, material, sinogram, scale, correct=True):
 
@@ -14,7 +16,18 @@ def ct_calibrate(photons, material, sinogram, scale, correct=True):
 	# Get dimensions and work out detection for just air of twice the side
 	# length (has to be the same as in ct_scan.py)
 	n = sinogram.shape[1]
+	angles = sinogram.shape[0]
+
+	calibration_scan = np.zeros((angles, n))
+	for angle in range(angles):
+		sys.stdout.write("Calibration angle: %d   \r" % (angle + 1) )
+
+		depth = np.full(n, float(2*n))
+		depth*= scale
+
+		calibration_scan[angle] = ct_detect(photons, material.coeff('Air'), depth)
 
 	# perform calibration
+	sinogram = -np.log(sinogram/calibration_scan)
 
 	return sinogram
