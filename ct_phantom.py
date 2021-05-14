@@ -92,7 +92,9 @@ def ct_phantom(names, n, type, metal=None):
 		
 		# impulse for looking at resolution
 		x = np.zeros((n, n))
-		x[int(n / 2)][int(n / 2)] = tissue
+		# x[int(n / 2)][int(n / 2)] = tissue
+		# move point attenuator away from center
+		x[int(n / 2+n/4)][int(n / 2+n/4)] = tissue
 		
 	elif type == 8:
 
