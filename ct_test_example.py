@@ -8,6 +8,7 @@ from ct_phantom import *
 from ct_lib import *
 from scan_and_reconstruct import *
 from create_dicom import *
+import matplotlib.pyplot as plt
 
 # create object instances
 material = Material()
@@ -21,15 +22,27 @@ def test_1():
 	# explain what this test is for
 
 	# work out what the initial conditions should be
-	p = ct_phantom(material.name, 256, 3)
-	s = source.photon('100kVp, 3mm Al')
-	y = scan_and_reconstruct(s, material, p, 0.01, 256)
+	p = ct_phantom(material.name, 256, 2, 'Titanium')
+	s = fake_source(material.mev, 0.12, material.coeff('Aluminium'), 2, method='ideal')
+	y = scan_and_reconstruct(s, material, p, 0.1, 256)
 
 	# save some meaningful results
 	save_draw(y, 'results', 'test_1_image')
 	save_draw(p, 'results', 'test_1_phantom')
+	save_draw(y-p, 'results', 'test_1_error')
 
 	# how to check whether these results are actually correct?
+	
+
+	error = y - p
+	max_index = np.unravel_index(y.argmax(), y.shape)
+
+	f = open('results/test_1_output.txt', mode='w')
+	f.write(f"max index  {max_index}")
+	f.close()
+
+	plt.plot(p[63, :])
+	save_plot(y[63,:], 'results', 'test_1_plot')
 
 def test_2():
 	# explain what this test is for
@@ -63,7 +76,7 @@ def test_3():
 # Run the various tests
 print('Test 1')
 test_1()
-print('Test 2')
-test_2()
-print('Test 3')
-test_3()
+# print('Test 2')
+# test_2()
+# print('Test 3')
+# test_3()
