@@ -2,17 +2,30 @@ import matplotlib.pyplot as plt
 import numpy as np
 import numpy.matlib
 import os
+from matplotlib.patches import * 
+from matplotlib.patches import Rectangle
 
 def draw(data, map='gray', caxis=None):
 	"""Draw an image"""
 	create_figure(data, map, caxis)
 	plt.show()
 
-
 def plot(data):
 	"""plot a graph"""
 	plt.plot(data)
 	plt.show()
+
+def draw_rectangle(data, coordinates, lengths, label, map='gray', caxis=None):
+	"""Draw an image with a highlighted rectangle"""
+	create_rectangle_figure(data, coordinates, lengths, label)
+	plt.show()
+
+def save_rectangle(data, storage_directory, file_name, coordinates, lengths, label, map='gray', caxis=None):
+	"""Save an image with a highlighted rectangle"""
+	create_rectangle_figure(data, coordinates, lengths, label)
+	full_path = get_full_path(storage_directory, file_name)
+	plt.savefig(full_path)
+	plt.close()
 
 def save_draw(data, storage_directory, file_name, map='gray', caxis=None):
 	"""save an image"""
@@ -21,6 +34,7 @@ def save_draw(data, storage_directory, file_name, map='gray', caxis=None):
 	full_path = get_full_path(storage_directory, file_name)
 	plt.savefig(full_path)
 	plt.close()
+
 
 def save_plot(data, storage_directory, file_name):
 	"""save a graph"""
@@ -75,3 +89,43 @@ def create_figure(data, map, caxis = None):
 
 	#add colorbar
 	plt.colorbar(im, orientation='vertical')
+
+def create_rectangle_figure(data, coordinates, lengths, label):
+	fig, ax = plt.subplots()
+	plt.axis('off') # no axes
+
+	ax.set_aspect('equal', 'box')
+	im = plt.imshow(data, cmap='gray')
+	plt.tight_layout()
+	plt.colorbar(im, orientation='vertical')
+	ax.add_patch( Rectangle((coordinates[0], coordinates[1]),
+                        lengths[0], lengths[1],
+                        fc ='none', 
+                        ec ='r', 
+						label=label))
+
+	plt.legend()
+	
+def create_circle_figure(data, coordinates, radius, label):
+	fig, ax = plt.subplots()
+	plt.axis('off') # no axes
+
+	ax.set_aspect('equal', 'box')
+	im = plt.imshow(data, cmap='gray')
+	plt.tight_layout()
+	plt.colorbar(im, orientation='vertical')
+	circle1 = plt.Circle((coordinates[1], coordinates[0]), radius, color='r', fill=False)
+	ax.add_patch(circle1)
+	plt.legend()
+
+def draw_circle(data, coordinates, radius, label, map='gray', caxis=None):
+	"""Draw an image with a highlighted circle"""
+	create_circle_figure(data, coordinates, radius, label)
+	plt.show()
+
+def save_circle(data, storage_directory, file_name, coordinates, radius, label, map='gray', caxis=None):
+	"""Save an image with a highlighted circle"""
+	create_circle_figure(data, coordinates, radius, label)
+	full_path = get_full_path(storage_directory, file_name)
+	plt.savefig(full_path)
+	plt.close()

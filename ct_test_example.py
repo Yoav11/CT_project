@@ -75,37 +75,65 @@ def test_3():
 	# how to check whether these results are actually correct?
 
 def test_4():
-	#Plot a 3D surface of a point
+	#Set up source, phantom and scan data
 	p = ct_phantom(material.name, 256, 2, 'Titanium')
 	s = fake_source(material.mev, 0.12, material.coeff('Aluminium'), 2, method='ideal')
 	scan = scan_and_reconstruct(s, material, p, 0.1, 256)
 
-	#Find average error of each layer around point attenuator
+	#Find the index of the point with the maximum value (this should be the point attenuator)
 	max_index = np.unravel_index(scan.argmax(), scan.shape)
 
+	#Normalise the scan with the attenuation coefficients, and subtract the phantom to find the error
 	scan /= np.max(scan)
 	scan *= 7
-	'''draw(scan)'''
 	error = abs(scan - p)
-	'''draw(error)'''
 
+	#Initialise values
 	last_sum = 0
 	avg_error = 1
 	
-	for n in range(1,10):
+	#Iterate over each layer expanding for the pixel with the maximum index to find 
+	# the average error in each outer layer
+	for n in range(1,50):
 		if avg_error < 0.1:
 			break
 		layer = (error[(max_index[0]-n):(max_index[0]+n+1), (max_index[1]-n):(max_index[1]+n+1)])
 		avg_error = (np.sum(layer)-last_sum)/ (((2*n +1)**2) - (2*n-1)**2)
 		last_sum = np.sum(layer)
 		print(avg_error)
+		return n
 
-	#Plot on 3D axis
+	radius = 2
+	draw_circle(scan, max_index, radius)
+
+	
+
+def test_circle():
+	#Find the centre of the radius
+	p = ct_phantom(material.name, 256, 2, 'Titanium')
+	s = fake_source(material.mev, 0.12, material.coeff('Aluminium'), 2, method='ideal')
+	scan = scan_and_reconstruct(s, material, p, 0.1, 256)
+	max_index = np.unravel_index(scan.argmax(), scan.shape)
+
+	x1 = 192
+	y1 = 63
+	radius = 2
+	fig, ax = plt.subplots()
+
+	ax.set_aspect('equal', 'box')
+	im = plt.imshow(scan, cmap='gray')
+	plt.tight_layout()
+	plt.colorbar(im, orientation='vertical')
+	circle1 = plt.Circle((max_index[1], max_index[0]), radius, color='r', fill=False)
+	ax.add_patch(circle1)
+	plt.show()
+
+	''' #Plot on 3D axis
 	x_axis = np.linspace(0, 256, 256)
 	y_axis = np.linspace(0, 256, 256)
 
 	X, Y = np.meshgrid(x_axis, y_axis)
-	Z1 = atten_values
+	Z1 = scan
 	Z2 = p
 	fig = plt.figure()
 	ax = plt.axes(projection='3d')
@@ -113,11 +141,8 @@ def test_4():
 			 edgecolor='none')
 	#ax.plot_surface(X, Y, Z2, rstride=1, cstride=1,
 			 #edgecolor='none')
-	#plt.show()
+	#plt.show()'''
 
-
-	#print(np.nonzero(p))
-	#print(np.nonzero(atten_values))
 
 # Run the various tests
 ''' print('Test 1')
@@ -128,6 +153,8 @@ print('Test 3')
 test_3() '''
 print('Test 4')
 test_4()
+print('Test circle')
+#test_circle()
 
 #Find the max index
 #max_index = np.unravel_index(y.argamax(), y.shape)
