@@ -97,14 +97,14 @@ def create_figure(data, map, caxis = None):
 	plt.colorbar(im, orientation='vertical')
 
 def create_circle_figure(data, coordinates, radius, label):
-  fig, ax = plt.subplots()
-	plt.axis('off') # no axes
+	fig, ax = plt.subplots()
 
+	plt.axis('off') # no axes
 	ax.set_aspect('equal', 'box')
 	im = plt.imshow(data, cmap='gray')
 	plt.tight_layout()
 	plt.colorbar(im, orientation='vertical')
-  circle1 = plt.Circle((coordinates[1], coordinates[0]), radius, label=label, color='r', fill=False)
+	circle1 = plt.Circle((coordinates[1], coordinates[0]), radius, label=label, color='r', fill=False)
 	ax.add_patch(circle1)
 	plt.legend()
   
@@ -116,12 +116,7 @@ def create_rectangle_figure(data, coordinates, lengths, label):
 	im = plt.imshow(data, cmap='gray')
 	plt.tight_layout()
 	plt.colorbar(im, orientation='vertical')
-  ax.add_patch( Rectangle((coordinates[0], coordinates[1]),
-                        lengths[0], lengths[1],
-                        fc ='none', 
-                        ec ='r', 
-						label=label))
-
+	ax.add_patch( Rectangle((coordinates[0], coordinates[1]), lengths[0], lengths[1], fc ='none', ec ='r', label=label))
 	plt.legend()
 
 def draw_circle(data, coordinates, radius, label, map='gray', caxis=None):

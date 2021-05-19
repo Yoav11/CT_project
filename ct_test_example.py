@@ -51,7 +51,7 @@ def test_1():
 	#Draw circle at required radius
 	base_radius=np.sqrt(2)/2 
 	radius=base_radius + np.sqrt(2)*(n-2)
-	
+
 	draw_circle(scan, max_index, radius, 'error' )
 
 	#Save diagram and area
@@ -60,8 +60,7 @@ def test_1():
 	f.write(f"area for set error {area}")
 	f.close()
 
-  save_circle(scan, 'results/test_1', 'test_1_output', max_index, radius, 'Error')
-
+	save_circle(scan, 'results/test_1', 'test_1_output', max_index, radius, 'Error')
 	assert area< 500, f'Area is above  BLAH BLAH, got {area}'
 
 def test_2():
