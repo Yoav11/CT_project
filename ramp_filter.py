@@ -27,11 +27,13 @@ def ramp_filter(sinogram, scale, alpha=0.001):
 	filt = np.zeros((angles, m))
 	f_max = 1 / (scale)
 	f = np.fft.fftfreq(m)
-	f[0] = f[1]/6
+
+  f[0] = f[1]/6
 	fourier_filter = (1/(2*scale)) * np.abs(f) * np.power(np.cos(np.pi/2 * f / f_max), alpha)
 	filt = np.fft.fft(sinogram, m, axis=1)
 	
 	filt *= fourier_filter
 
 	sinogram = np.real(np.fft.ifft(filt, axis=1))[:, :n]
+
 	return sinogram
