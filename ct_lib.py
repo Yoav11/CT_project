@@ -23,6 +23,7 @@ def draw_rectangle(data, coordinates, lengths, label, map='gray', caxis=None):
 def save_rectangle(data, storage_directory, file_name, coordinates, lengths, label, map='gray', caxis=None):
 	"""Save an image with a highlighted rectangle"""
 	create_rectangle_figure(data, coordinates, lengths, label)
+	
 	full_path = get_full_path(storage_directory, file_name)
 	plt.savefig(full_path)
 	plt.close()
@@ -41,6 +42,12 @@ def save_plot(data, storage_directory, file_name):
 	plt.plot(data)
 	plt.savefig(full_path)
 	plt.close()
+
+def convert_phantom(phantom, attenuations):
+	"""Convert phantom from index values to attenuation values"""
+	for i in range(len(attenuations)):
+		phantom[np.where(phantom == i)] = attenuations[i]
+	return phantom
 
 def save_numpy_array(data, storage_directory, file_name):
 	"""save a numpy array in .npy format"""
