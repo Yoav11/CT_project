@@ -25,20 +25,14 @@ def ramp_filter(sinogram, scale, alpha=0.001):
 	print('Ramp filtering')
 
 	filt = np.zeros((angles, m))
-	d_theta = 1 / angles
-	f_max = 1 / (2 * d_theta)
-	f = np.fft.fftfreq(m, d = 2 / f_max).reshape(-1, 1)
+	f_max = 1 / (scale)
+	f = np.fft.fftfreq(m)
 
-	f[0, 0] = f[1, 0]/6
-	fourier_filter = np.abs(f) * np.power(np.cos(np.pi/2 * f / f_max), alpha)
+	f[0] = f[1]/6
+	fourier_filter = (1/(2*scale)) * np.abs(f) * np.power(np.cos(np.pi/2 * f / f_max), alpha)
+	filt = np.fft.fft(sinogram, m, axis=1)
 
-	filt = np.fft.fft(sinogram, m, norm='ortho', axis=0)
-	# plt.plot(filt)
 	filt *= fourier_filter
-	# print(filt.shape)
-	sinogram = np.real(np.fft.ifft(filt, norm='ortho', axis=0))[:angles, :]
-
-	# plt.plot(fourier_filter)
-	# plt.show()
+	sinogram = np.real(np.fft.ifft(filt, axis=1))[:, :n]
 	
 	return sinogram
