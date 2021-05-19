@@ -1,7 +1,6 @@
 
 # these are the imports you are likely to need
 import numpy as np
-from numpy.lib.npyio import save
 from material import *
 from source import *
 from fake_source import *
