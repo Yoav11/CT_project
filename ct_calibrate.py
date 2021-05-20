@@ -15,17 +15,23 @@ def ct_calibrate(photons, material, sinogram, scale, correct=True):
 
 	# Get dimensions and work out detection for just air of twice the side
 	# length (has to be the same as in ct_scan.py)
+
+	# get sinogram dimensions
 	n = sinogram.shape[1]
 	angles = sinogram.shape[0]
 
+	print('Calibrating')
+
+	# initialise calibration sinogram
 	calibration_scan = np.zeros((angles, n))
-	for angle in range(angles):
-		sys.stdout.write("Calibration angle: %d   \r" % (angle + 1) )
 
-		depth = np.full(n, float(2*n))
-		depth*= scale
+	# initialise depth array to twice the side length and scale
+	depth = np.full(n, float(2*n))
+	depth *= scale
 
-		calibration_scan[angle] = ct_detect(photons, material.coeff('Air'), depth)
+	# run scan through air once and repeat along all angles
+	calibration_scan = np.repeat( ct_detect(photons, material.coeff('Air'), depth)[:, np.newaxis], \
+					angles, axis=1 )
 
 	# perform calibration
 	sinogram = -np.log(sinogram/calibration_scan)

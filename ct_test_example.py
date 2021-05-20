@@ -20,79 +20,96 @@ source = Source()
 
 def test_1():
 	''' 
-	Test for reconstruction geometry: reconstruct a point attenuator phantom and work out the radius over which the attenuation value spreads
+	Test for reconstruction geometry:
+
+	reconstruct a point attenuator phantom away from the origin,
+	check the location of the attenuator matches the phantom and 
+	evaluate the radius over which the attenuation value spreads
 	'''
-	#Create phantom for point attenuator and produce reconstructed image
+
+	# INITIAL CONDITIONS
+
+	# point attenuator phantom used for comparing geometry
 	p = ct_phantom(material.name, 256, 2, 'Titanium')
-	s = fake_source(material.mev, 0.12, material.coeff('Aluminium'), 2, method='ideal')
+
+	# ideal source used for evaluating error and spread
+	source_energy = 0.12
+	s = fake_source(material.mev, source_energy, material.coeff('Aluminium'), 2, method='ideal')
+
+	# SETUP
+
+	# generate scan
 	scan = scan_and_reconstruct(s, material, p, 0.1, 256)
 
-	#Replace values in phantom with known attenuation
-	p[p==7]=material.coeffs[:, np.where(material.mev == 0.12)[0][0]][7]
+	# find material attenuation coefficients for chosen ideal source
+	material_attenuations = material.coeffs[:, np.where(material.mev == source_energy)[0][0]]
+	# convert phantom image from indices to true attenuation values
+	p = convert_phantom(p, material_attenuations)
 	
-	#Find absolute error
+	# find absolute error
 	error = abs(scan - p)
-	
-	#Find location of the pixel with maximum value in the reconstructed image
+	# find location of the pixel with maximum value in the reconstructed image
 	max_index = np.unravel_index(scan.argmax(), scan.shape)
 
-	#Initialise loop with given values
-	last_sum = 0
-	avg_error = 1
-	
-	#Iterate over the pixels surrouding the maximum value and calculates the average error at each 'layer' - maximum error is 0.01
-	for n in range(1,256):
-		if avg_error < 0.01:
-			break
-		layer = (error[(max_index[0]-n):(max_index[0]+n+1), (max_index[1]-n):(max_index[1]+n+1)])
-		avg_error = (np.sum(layer)-last_sum)/ (((2*n +1)**2) - (2*n-1)**2)
-		last_sum = np.sum(layer)
-	
-	#Draw circle at required radius
-	base_radius=np.sqrt(2)/2 
-	radius=base_radius + np.sqrt(2)*(n-2)
+	# measure radius of spread
+	radius = measure_spread(error, max_index, 0.01)
 
-	draw_circle(scan, max_index, radius, 'error' )
+	# TESTS
 
-	#Save diagram and area
-	area=np.pi*(radius**2)
+	# save diagram with highlighted attenuation area
+	save_circle(scan, 'results/test_1', 'test_1_image', max_index, radius, 'Error')
+
+	# find location of the pixel with maximum value in the phantom image
+	max_index_phantom = np.unravel_index(p.argmax(), p.shape)
+
+	# save location of maximum value and area of attenuation circle
+	area = np.pi*(radius**2)
 	f = open('results/test_1/test_1_output.txt', mode='w')
-	f.write(f"area for set error {area}")
+	f.write(f"Position of max attenuation, Scan: {max_index}, Phantom: {max_index_phantom} \n")
+	f.write(f"Area of circle { round(area, 3) }")
 	f.close()
 
-	save_circle(scan, 'results/test_1', 'test_1_output', max_index, radius, 'Error')
-	assert area< 500, f'Area is above  BLAH BLAH, got {area}'
+	# expect that location of maximum attenuation in reconstructed image matches location in phantom
+	assert max_index == max_index_phantom, f'max attenuation location does not \
+						match, got {max_index}, expected {max_index_phantom}'
+	# expect that attenuation spread area is sufficiently small
+	assert area < 15, f'area is above threshold, got {area}'
 
 def test_2():
-	# Tests that reconstructed implant image has correct attenuation values
+	''' 
+	Test for reconstruction values:
 
-	# set up initial conditions
-	source_energy = 0.12
+	reconstruct a hip implant phantom, check that the attenuation 
+	value of the implant most closely matches the attenuation value 
+	of the phantom implant material and evaluate the attenuation error of the implant
+	'''
 
+	# INITIAL CONDITIONS
+
+	# hip implant phantom
 	p = ct_phantom(material.name, 256, 3)
+	# ideal source used for comparing material values
+	source_energy = 0.10
 	s = fake_source(material.mev, source_energy, method='ideal')
-	y = scan_and_reconstruct(s, material, p, 0.01, 256)
 
-	# Find location of implant using phantom reference
+	# SETUP
+
+	# generate scan
+	scan = scan_and_reconstruct(s, material, p, 0.01, 256)
+
+	# find location of implant using phantom as reference
 	implant_location = np.where(p == 7)
-	# Average attenuation values on reconstructed image
-	implant_attenuation = np.mean(y[implant_location])
-	# Find material attenuation coefficients for chosen ideal source
+	# average attenuation values of implant on reconstructed image
+	implant_attenuation = np.mean(scan[implant_location])
+	# find material attenuation coefficients for chosen ideal source
 	material_attenuations = material.coeffs[:, np.where(material.mev == source_energy)[0][0]]
 
-	# Find the difference between the material coefficients and the computed average and find the min
+	# find the difference between the material coefficients and the computed average and find the min
 	error = np.abs(material_attenuations - implant_attenuation)
 	material_idx = error.argmin()
 
-	# Use the closest material attenuation value to infer material of implant
+	# use the closest material attenuation value to infer material of implant
 	predicted_material = material.name[material_idx]
-
-	# save some meaningful results
-	f = open('results/test_2/test_2_output.txt', mode='w')
-	f.write(f"Implent attenuation value is  {round(implant_attenuation, 3)} \n")
-	f.write(f"Predicted material is {predicted_material} \n")
-	f.write(f"Attenuation error is {round(error[material_idx], 3)} \n")
-	f.close()
 
 	# Set parameters for drawing rectangle
 	x1 = min(implant_location[1])
@@ -101,23 +118,44 @@ def test_2():
 	lx = implant_location[0][-1] - y1
 	ly =  max(implant_location[1]) - min(implant_location[1])
 
-	# Plot rectangle around implant and label using predicted material
-	save_rectangle(y, 'results/test_2', 'test_2_image', (x1, y1), (lx, ly), predicted_material)
+	# TESTS
 
-	# Check predicted material for implant is Titanium
+	# save diagram with highlighted implant location and material
+	save_rectangle(scan, 'results/test_2', 'test_2_image', (x1, y1), (lx, ly), predicted_material)
+	
+	# save implant attenuation value, error and inferred material
+	f = open('results/test_2/test_2_output.txt', mode='w')
+	f.write(f"Implant attenuation value is  {round(implant_attenuation, 3)} \n")
+	f.write(f"Predicted material is {predicted_material} \n")
+	f.write(f"Attenuation error is {round(error[material_idx], 3)}\n")
+	f.write(f"As a percentage is {round(error[material_idx]*100/implant_attenuation, 3)} %\n")
+	f.close()
+
+	# Expect predicted material for implant to be Titanium
 	assert predicted_material == "Titanium", f"Implant should be Titanium, got {predicted_material}"
-	# Check attenuation error is within bounds
-	assert error[material_idx] < 0.5, f"Attenuation error too large, got {error[material_idx]}"
+	# Check attenuation error is sufficiently small
+	assert error[material_idx] < 0.05, f"Attenuation error too large, got {error[material_idx]}"
 
 def test_3():
-	# Tests that reconstructed image is accurate to the original phantom
+	''' 
+	Test for reconstruction accuracy:
 
-	# set up initial conditions
-	source_energy = 0.14
+	reconstruct the pelvic fixation pins phantom, check that the error
+	between the phantom and the reconstruction is sufficiently small
+	'''
 
+	# INITIAL CONDITIONS
+	
+	# pelvic fixation pins phantom
 	p = ct_phantom(material.name, 256, 7)
+	# ideal source used for converting phantom to predictable attenuation value
+	source_energy = 0.14
 	s = fake_source(source.mev, source_energy, method='ideal')
-	y = scan_and_reconstruct(s, material, p, 0.1, 256)
+
+	# SETUP
+
+	# generate scan
+	scan = scan_and_reconstruct(s, material, p, 0.1, 256)
 
 	# Find material attenuation coefficients for chosen ideal source
 	material_attenuations = material.coeffs[:, np.where(material.mev == source_energy)[0][0]]
@@ -125,20 +163,23 @@ def test_3():
 	p = convert_phantom(p, material_attenuations)
 
 	# Find the error between the scaled phantom and reconstructed image
-	error_image = y-p
+	error_image = scan-p
 	# Measure RMS error, ignoring pixels outside of scanning circle
 	rms_error = np.sqrt(np.mean(error_image[np.where(error_image > -1)]**2))
 
-	# save some meaningful results
-	save_draw(y, 'results/test_3', 'test_3_image')
+	# TESTS
+
+	# save scan, scaled phantom and error images
+	save_draw(scan, 'results/test_3', 'test_3_image')
 	save_draw(p, 'results/test_3', 'test_3_phantom_scaled')
 	save_draw(error_image, 'results/test_3', 'test_3_error')
 
+	# save RMS reconstruction error
 	f = open('results/test_3/test_3_output.txt', mode='w')
 	f.write(f"RMS reconstruction error is {round(rms_error, 5)} \n")
 	f.close()
 
-	# Check that measured RMS error is within acceptable bounds
+	# expect that measured RMS error is sufficiently small
 	assert rms_error < 0.06, f"RMS error too large, got {rms_error}"
 
 

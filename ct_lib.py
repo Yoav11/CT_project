@@ -97,26 +97,37 @@ def create_figure(data, map, caxis = None):
 	plt.colorbar(im, orientation='vertical')
 
 def create_circle_figure(data, coordinates, radius, label):
+	"""Create plot with highlighted circle"""
 	fig, ax = plt.subplots()
 
 	plt.axis('off') # no axes
-	ax.set_aspect('equal', 'box')
+
 	im = plt.imshow(data, cmap='gray')
+
+	# equal aspect ratio
+	ax.set_aspect('equal', 'box')
 	plt.tight_layout()
-	plt.colorbar(im, orientation='vertical')
+
 	circle1 = plt.Circle((coordinates[1], coordinates[0]), radius, label=label, color='r', fill=False)
 	ax.add_patch(circle1)
+
+	plt.colorbar(im, orientation='vertical')
 	plt.legend()
   
 def create_rectangle_figure(data, coordinates, lengths, label):
+	"""Create plot with highlighted rectangle"""
 	fig, ax = plt.subplots()
+
 	plt.axis('off') # no axes
 
 	ax.set_aspect('equal', 'box')
 	im = plt.imshow(data, cmap='gray')
-	plt.tight_layout()
-	plt.colorbar(im, orientation='vertical')
+
+	# equal aspect ratio
 	ax.add_patch( Rectangle((coordinates[0], coordinates[1]), lengths[0], lengths[1], fc ='none', ec ='r', label=label))
+	plt.tight_layout()
+	
+	plt.colorbar(im, orientation='vertical')
 	plt.legend()
 
 def draw_circle(data, coordinates, radius, label, map='gray', caxis=None):
@@ -128,5 +139,29 @@ def save_circle(data, storage_directory, file_name, coordinates, radius, label, 
 	"""Save an image with a highlighted circle"""
 	create_circle_figure(data, coordinates, radius, label)
 	full_path = get_full_path(storage_directory, file_name)
+	
 	plt.savefig(full_path)
-	plt.close() 
+	plt.close()
+
+def measure_spread(image, location, threshold=0.01):
+	"""given an error image and location of a point, returns radius of circle around that point
+	where error is above a given threshold"""
+
+	# iterate over the pixels surrouding the maximum value and 
+	# calculate the average error at each 'layer' until error is small
+	last_sum = 0
+	for n in range(1,256):
+		# select pixels around the maximum value at distance n
+		layer = (image[(location[0]-n):(location[0]+n+1), (location[1]-n):(location[1]+n+1)])
+		# compute the average error on the outer pixels of that layer
+		avg_error = (np.sum(layer)-last_sum)/ ((np.power((2*n+1), 2)) - np.power((2*n-1), 2))
+		# keep track of current error sum for next iteration
+		last_sum = np.sum(layer)
+
+		# stop when average error drops below threshold
+		if avg_error < threshold:
+			break
+
+	# calculate radius around spreaded area, if n = 0, draws around point attenuator
+	base_radius = np.sqrt(2)/2
+	return base_radius + np.sqrt(2)*(n-1)

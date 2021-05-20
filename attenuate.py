@@ -38,9 +38,13 @@ def attenuate(original_energy, coeff, depth):
 	if len(depth) != samples:
 		raise ValueError('input depth has different number of samples to input original_energy')
 
-	# Work out residual energy for each depth and at each energy
-	for i in range(energies):
-		u = coeff[i]
-		original_energy[i] *= np.exp(-u*depth)
+	''' 
+	work out residual energy for each depth and at each energy
+
+	transforms coeff and depth arrays so that dimensions match original_energy
+	matrix for element-wise multiplication
+	'''
+	original_energy *= np.exp( -np.repeat(coeff[:, np.newaxis], samples, axis=1 ) \
+					* np.tile( depth, (energies, 1) ))
 
 	return original_energy
