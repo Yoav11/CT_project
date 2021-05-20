@@ -133,7 +133,7 @@ def test_2():
 
 	# Expect predicted material for implant to be Titanium
 	assert predicted_material == "Titanium", f"Implant should be Titanium, got {predicted_material}"
-	# Check attenuation error is sufficiently small
+	# Expect attenuation error is sufficiently small
 	assert error[material_idx] < 0.05, f"Attenuation error too large, got {error[material_idx]}"
 
 def test_3():
