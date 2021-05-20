@@ -46,12 +46,12 @@ def test_1():
 	# convert phantom image from indices to true attenuation values
 	p = convert_phantom(p, material_attenuations)
 	
-	# find absolute error
-	error = abs(scan - p)
 	# find location of the pixel with maximum value in the reconstructed image
 	max_index = np.unravel_index(scan.argmax(), scan.shape)
+	# find absolute error
+	error = abs(scan - p)
 
-	# measure radius of spread
+	# measure radius of spread on error image
 	radius = measure_spread(error, max_index, 0.01)
 
 	# TESTS
