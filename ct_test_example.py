@@ -46,12 +46,12 @@ def test_1():
 	# convert phantom image from indices to true attenuation values
 	p = convert_phantom(p, material_attenuations)
 	
-	# find absolute error
-	error = abs(scan - p)
 	# find location of the pixel with maximum value in the reconstructed image
 	max_index = np.unravel_index(scan.argmax(), scan.shape)
+	# find absolute error
+	error = abs(scan - p)
 
-	# measure radius of spread
+	# measure radius of spread on error image
 	radius = measure_spread(error, max_index, 0.01)
 
 	# TESTS
@@ -133,7 +133,7 @@ def test_2():
 
 	# Expect predicted material for implant to be Titanium
 	assert predicted_material == "Titanium", f"Implant should be Titanium, got {predicted_material}"
-	# Check attenuation error is sufficiently small
+	# Expect attenuation error is sufficiently small
 	assert error[material_idx] < 0.05, f"Attenuation error too large, got {error[material_idx]}"
 
 def test_3():
