@@ -42,7 +42,7 @@ def test_1():
 	scan = scan_and_reconstruct(s, material, p, 0.1, 256)
 
 	# find material attenuation coefficients for chosen ideal source
-	material_attenuations = material.coeffs[:, np.where(material.mev == round(0.7*source_energy,2))[0][0]]
+	material_attenuations = material.coeffs[:, np.where(material.mev == round(0.7*source_energy,3))[0][0]]
 	# convert phantom image from indices to true attenuation values
 	p = convert_phantom(p, material_attenuations)
 	
@@ -102,7 +102,7 @@ def test_2():
 	# average attenuation values of implant on reconstructed image
 	implant_attenuation = np.mean(scan[implant_location])
 	# find material attenuation coefficients for chosen ideal source
-	material_attenuations = material.coeffs[:, np.where(material.mev == round(0.7*source_energy,2))[0][0]]
+	material_attenuations = material.coeffs[:, np.where(material.mev == round(0.7*source_energy,3))[0][0]]
 
 	# find the difference between the material coefficients and the computed average and find the min
 	error = np.abs(material_attenuations - implant_attenuation)
@@ -158,7 +158,7 @@ def test_3():
 	scan = scan_and_reconstruct(s, material, p, 0.1, 256)
 
 	# Find material attenuation coefficients for chosen ideal source
-	material_attenuations = material.coeffs[:, np.where(material.mev == round(0.7*source_energy,2))[0][0]]
+	material_attenuations = material.coeffs[:, np.where(material.mev == round(0.7*source_energy,3))[0][0]]
 	# Convert phantom image from indices to true attenuation values
 	p = convert_phantom(p, material_attenuations)
 
