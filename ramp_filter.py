@@ -30,7 +30,8 @@ def ramp_filter(sinogram, scale, alpha=0.001):
 	f[0] = f[1]/6
 
 	# Ram-Lak filter with raised_cosine
-	filter = f_max * np.abs(f) * np.power(np.cos(np.pi/2 * f / f_max), alpha)
+	filter = 2 * f_max * np.abs(f) * np.power(np.cos(np.pi/2 * f / f_max), alpha)
+
 	# compute fft of sinogram
 	freq_distribution = np.fft.fft(sinogram, m, axis=1)
 	

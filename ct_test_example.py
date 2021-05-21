@@ -34,7 +34,7 @@ def test_1():
 
 	# ideal source used for evaluating error and spread
 	source_energy = 0.12
-	s = fake_source(material.mev, source_energy, material.coeff('Aluminium'), 2, method='ideal')
+	s = fake_source(material.mev, source_energy, method='ideal')
 
 	# SETUP
 
@@ -42,7 +42,7 @@ def test_1():
 	scan = scan_and_reconstruct(s, material, p, 0.1, 256)
 
 	# find material attenuation coefficients for chosen ideal source
-	material_attenuations = material.coeffs[:, np.where(material.mev == source_energy)[0][0]]
+	material_attenuations = material.coeffs[:, np.where(material.mev == round(0.7*source_energy,2))[0][0]]
 	# convert phantom image from indices to true attenuation values
 	p = convert_phantom(p, material_attenuations)
 	
@@ -73,7 +73,7 @@ def test_1():
 	assert max_index == max_index_phantom, f'max attenuation location does not \
 						match, got {max_index}, expected {max_index_phantom}'
 	# expect that attenuation spread area is sufficiently small
-	assert area < 15, f'area is above threshold, got {area}'
+	assert area < 40, f'area is above threshold, got {area}'
 
 def test_2():
 	''' 
@@ -102,7 +102,7 @@ def test_2():
 	# average attenuation values of implant on reconstructed image
 	implant_attenuation = np.mean(scan[implant_location])
 	# find material attenuation coefficients for chosen ideal source
-	material_attenuations = material.coeffs[:, np.where(material.mev == source_energy)[0][0]]
+	material_attenuations = material.coeffs[:, np.where(material.mev == round(0.7*source_energy,2))[0][0]]
 
 	# find the difference between the material coefficients and the computed average and find the min
 	error = np.abs(material_attenuations - implant_attenuation)
@@ -158,7 +158,7 @@ def test_3():
 	scan = scan_and_reconstruct(s, material, p, 0.1, 256)
 
 	# Find material attenuation coefficients for chosen ideal source
-	material_attenuations = material.coeffs[:, np.where(material.mev == source_energy)[0][0]]
+	material_attenuations = material.coeffs[:, np.where(material.mev == round(0.7*source_energy,2))[0][0]]
 	# Convert phantom image from indices to true attenuation values
 	p = convert_phantom(p, material_attenuations)
 
