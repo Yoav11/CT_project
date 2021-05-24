@@ -10,7 +10,7 @@ def ct_detect(p, coeffs, depth, mas=10000):
 	in depth (materials, samples) and returns the detections at each sample
 	in y (samples).
 
-	mas defines the current-time-product which affects the noise distribution
+mas defines the current-time-product which affects the noise distribution
 	for the linear attenuation"""
 
 	# check p for number of energies
@@ -30,7 +30,7 @@ def ct_detect(p, coeffs, depth, mas=10000):
 	if coeffs.shape[1] != energies:
 		raise ValueError('input coeffs has different number of energies to input p')
 	materials = coeffs.shape[0]
-
+	
 	# check depth is of (materials, samples)
 	if type(depth) != np.ndarray:
 		depth = np.array([depth]).reshape((1,1))
@@ -45,6 +45,7 @@ def ct_detect(p, coeffs, depth, mas=10000):
 		raise ValueError('input depth has different number of materials to input coeffs')
 	samples = depth.shape[1]
 
+
 	# extend source photon array so it covers all samples
 	detector_photons = np.zeros([energies, samples])
 	for e in range(energies):
@@ -58,7 +59,16 @@ def ct_detect(p, coeffs, depth, mas=10000):
 	detector_photons = np.sum(detector_photons, axis=0)
 
 	# model noise
-
+	''' add noise as a result of background radiation and multiple scattering - additional
+	detection due to indirect scattering
+	'''
+	'''
+	fixed = 1e+5
+	background = np.random.poisson(fixed, 256)
+	multiple = 0.01*p
+	scatterer = np.random.poisson(multiple, 256)
+	detector_photons += (background + scatterer) 
+'''
 	# minimum detection is one photon
 	detector_photons = np.clip(detector_photons, 1, None)
 

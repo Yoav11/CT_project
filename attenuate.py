@@ -35,7 +35,7 @@ def attenuate(original_energy, coeff, depth):
 		depth = np.array([depth])
 	elif depth.ndim != 1:
 		raise ValueError('input depth has more than one dimension')
-	if len(depth) != samples:
+	if len(depth) != samples: 
 		raise ValueError('input depth has different number of samples to input original_energy')
 
 	''' 
@@ -46,5 +46,16 @@ def attenuate(original_energy, coeff, depth):
 	'''
 	original_energy *= np.exp( -np.repeat(coeff[:, np.newaxis], samples, axis=1 ) \
 					* np.tile( depth, (energies, 1) ))
+
+	'''estimation of the estimated transmitted scatterer distribution
+	lambd = 
+	noise = np.random.poisson(lam=1.0, size=None)
+	'''
+
+	for i in np.nonzero(original_energy)[0]:
+		print(i)
+		original_energy[i] = np.random.poisson(original_energy[i]).astype('float64')
+	#print(lam[51])
+	#original_energy = np.random.poisson(original_energy[:10]).astype('float64')
 
 	return original_energy
