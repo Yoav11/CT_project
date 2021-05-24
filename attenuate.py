@@ -52,9 +52,7 @@ def attenuate(original_energy, coeff, depth):
 	noise = np.random.poisson(lam=1.0, size=None)
 	'''
 
-	for i in np.nonzero(original_energy)[0]:
-		print(i)
-		original_energy[i] = np.random.poisson(original_energy[i]).astype('float64')
+	original_energy = np.random.poisson(original_energy).astype('float64')
 	#print(lam[51])
 	#original_energy = np.random.poisson(original_energy[:10]).astype('float64')
 
