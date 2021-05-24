@@ -182,12 +182,67 @@ def test_3():
 	# expect that measured RMS error is sufficiently small
 	assert rms_error < 0.06, f"RMS error too large, got {rms_error}"
 
+def test_4():
+	energies = [0.005, 0.01, 0.015, 0.02, 0.03, 0.1, 0.12, 0.15]
+	for s in energies:
+		source = fake_source(material.mev, s, method='ideal')
+		y = ct_detect(source, material.coeff('Water'),np.arange(0, 10.1, 0.1), 1)
+		plt.plot(np.log(y), label=round(s*1000, 3))
+	plt.xlabel('depth')
+	plt.ylabel('residual energy')
+	plt.legend()
 
+	full_path = get_full_path('results', 'test_4')
+	plt.savefig(full_path)
+	plt.close()
+
+def test_5():
+	s1 = fake_source(material.mev, 0.08, material.coeff('Aluminium'), 2)
+	s2 = fake_source(material.mev, 0.08, material.coeff('Aluminium'), 0)
+
+	y = ct_detect(s1, material.coeff('Water'),np.arange(0, 10.1, 0.1), 1)
+	plt.plot(np.log(y), label='2mm Aluminium')
+
+	y = ct_detect(s2, material.coeff('Water'),np.arange(0, 10.1, 0.1), 1)
+	plt.plot(np.log(y), label='non-filtered')
+
+	plt.xlabel('depth')
+	plt.ylabel('residual energy')
+	plt.legend()
+
+	full_path = get_full_path('results', 'test_4')
+	plt.savefig(full_path)
+	plt.close()
+
+def test_6():
+	s1 = source.photon('100kVp, 2mm Al')
+
+
+	y = ct_detect(s1, material.coeff('Water'),np.arange(0, 10.1, 0.1), 1)
+	plt.plot(np.log(y), label='Water')
+
+	y = ct_detect(s1, material.coeff('Titanium'),np.arange(0, 10.1, 0.1), 1)
+	plt.plot(np.log(y), label='Titanium')
+
+	y = ct_detect(s1, material.coeff('Bone'),np.arange(0, 10.1, 0.1), 1)
+	plt.plot(np.log(y), label='Bone')
+
+	plt.xlabel('depth')
+	plt.ylabel('residual energy')
+	plt.legend()
+
+	full_path = get_full_path('results', 'test_4')
+	plt.show()
+	plt.savefig(full_path)
+	plt.close()
 
 # Run the various tests
-print('Test 1')
-test_1()
-print('Test 2')
-test_2()
-print('Test 3')
-test_3()
+# print('Test 1')
+# test_1()
+# print('Test 2')
+# test_2()
+# print('Test 3')
+# test_3()
+# print('Test 3')
+# test_3()
+test_6()
