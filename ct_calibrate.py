@@ -33,6 +33,8 @@ def ct_calibrate(photons, material, sinogram, scale, correct=True):
 	calibration_scan = np.repeat( ct_detect(photons, material.coeff('Air'), depth)[:, np.newaxis], \
 					angles, axis=1 )
 
+	calibration_scan = np.transpose(calibration_scan)
+
 	# perform calibration
 	sinogram = -np.log(sinogram/calibration_scan)
 
