@@ -63,12 +63,14 @@ mas defines the current-time-product which affects the noise distribution
 	detection due to indirect scattering
 	'''
 	
-	fixed = 1e+5
-	background = np.random.poisson(fixed, max(depth.shape))
-	multiple = 0.01
+	# background radiation follows a poisson distribution with a fixed mean
+	background = np.random.poisson(5e+5, max(depth.shape))
+
+	# model noise as a result of multiple scattering, which scales with the number of source photons
+	multiple = 0.00000001 * np.sum(p)
 	scatterer = np.random.poisson(multiple, max(depth.shape))
 	detector_photons += (background + scatterer).astype('float64') 
-
+	
 	# minimum detection is one photon
 	detector_photons = np.clip(detector_photons, 1, None)
 

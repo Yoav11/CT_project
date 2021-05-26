@@ -1,6 +1,7 @@
 import numpy as np
 import math
 
+
 def attenuate(original_energy, coeff, depth):
 	"""calculates residual photons for a particular material and depth
 	attenuate(original_energy, coeff, depth, mas) takes the original_energy
@@ -51,9 +52,10 @@ def attenuate(original_energy, coeff, depth):
 	lambd = 
 	noise = np.random.poisson(lam=1.0, size=None)
 	'''
-
-	original_energy = np.random.poisson(original_energy).astype('float64')
-	#print(lam[51])
-	#original_energy = np.random.poisson(original_energy[:10]).astype('float64')
+	
+	# find the mean of the poisson distribution to model the estimated transmitted
+	# scatterer distribution
+	lam = original_energy.astype(np.float64)
+	original_energy = np.random.poisson(lam).astype('float64')
 
 	return original_energy
