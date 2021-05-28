@@ -55,22 +55,29 @@ mas defines the current-time-product which affects the noise distribution
 	for m in range(materials):
 		detector_photons = attenuate(detector_photons, coeffs[m], depth[m])
 
+	
+
+
 	# sum this over energies
 	detector_photons = np.sum(detector_photons, axis=0)
 
+	# find the mean of the poisson distribution to model the estimated transmitted
+	# scatterer distribution
+	lam = (detector_photons.astype(np.float64))
+	detector_photons = np.random.poisson(lam/1e6).astype('float64')
+	detector_photons *= 1e6
+
 	# model noise
-	''' add noise as a result of background radiation and multiple scattering - additional
-	detection due to indirect scattering
-	'''
 	
 	# background radiation follows a poisson distribution with a fixed mean
 	background = np.random.poisson(5e+5, max(depth.shape))
 
 	# model noise as a result of multiple scattering, which scales with the number of source photons
-	multiple = 0.00000001 * np.sum(p)
-	scatterer = np.random.poisson(multiple, max(depth.shape))
-	detector_photons += (background + scatterer).astype('float64') 
-	
+	scatterer = np.random.poisson((0.000001 * np.sum(p)), max(depth.shape))
+
+	# sum the noise
+	detector_photons += (background + scatterer).astype('float64')
+
 	# minimum detection is one photon
 	detector_photons = np.clip(detector_photons, 1, None)
 

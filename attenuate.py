@@ -48,14 +48,5 @@ def attenuate(original_energy, coeff, depth):
 	original_energy *= np.exp( -np.repeat(coeff[:, np.newaxis], samples, axis=1 ) \
 					* np.tile( depth, (energies, 1) ))
 
-	'''estimation of the estimated transmitted scatterer distribution
-	lambd = 
-	noise = np.random.poisson(lam=1.0, size=None)
-	'''
-	
-	# find the mean of the poisson distribution to model the estimated transmitted
-	# scatterer distribution
-	lam = original_energy.astype(np.float64)
-	original_energy = np.random.poisson(lam).astype('float64')
 
 	return original_energy
