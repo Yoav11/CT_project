@@ -16,6 +16,7 @@ def scan_and_reconstruct(photons, material, phantom, scale, angles, mas=10000, a
 
 
 	# convert source (photons per (mas, cm^2)) to photons
+	photons = photons * mas * pow(scale, 2)
 
 	# create sinogram from phantom data, with received detector values
 	sinogram = ct_scan(photons, material, phantom, scale, angles, mas)

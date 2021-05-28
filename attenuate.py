@@ -1,6 +1,7 @@
 import numpy as np
 import math
 
+
 def attenuate(original_energy, coeff, depth):
 	"""calculates residual photons for a particular material and depth
 	attenuate(original_energy, coeff, depth, mas) takes the original_energy
@@ -35,7 +36,7 @@ def attenuate(original_energy, coeff, depth):
 		depth = np.array([depth])
 	elif depth.ndim != 1:
 		raise ValueError('input depth has more than one dimension')
-	if len(depth) != samples:
+	if len(depth) != samples: 
 		raise ValueError('input depth has different number of samples to input original_energy')
 
 	''' 
@@ -46,5 +47,6 @@ def attenuate(original_energy, coeff, depth):
 	'''
 	original_energy *= np.exp( -np.repeat(coeff[:, np.newaxis], samples, axis=1 ) \
 					* np.tile( depth, (energies, 1) ))
+
 
 	return original_energy
